@@ -1,7 +1,7 @@
 # Servio — Cahier des charges
 
 > Planning d'équipe et gestion de stock pour la restauration.
-> Version 1.3 — 5 novembre 2026 — Thibault Charron
+> Version 1.4 — 5 novembre 2026 — Thibault Charron
 
 ---
 
@@ -39,7 +39,7 @@ Servio est né d'une expérience de manager en restauration. Dans la plupart des
 ### Périmètre de départ
 
 - Un seul établissement au lancement. Le modèle de données prévoit plusieurs établissements, pour ne rien avoir à refaire plus tard.
-- Convention collective de référence : HCR (IDCC 1979).
+- Servio n'est pas un outil RH et ne sert pas de référence en matière de droit du travail : les règles de planification sont fixées par l'établissement, sous sa responsabilité.
 
 ---
 
@@ -90,10 +90,10 @@ Chaque fonctionnalité est marquée **MVP** (première version) ou **Évolution*
 
 - Connexion par email et mot de passe.
 - Mot de passe **hashé** avec le `PasswordHasher` de Symfony (algorithme `auto`), jamais stocké en clair.
-- Authentification par **JWT** (LexikJWTAuthenticationBundle) entre React et l'API.
-- Un compte peut être désactivé sans être supprimé.
+- Authentification par **session** avec le SecurityBundle de Symfony (`json_login`) : React et l'API sont servis depuis le même domaine.
+- Un compte peut être désactivé sans être supprimé : l'accès est coupé immédiatement.
 - Les comptes sont créés par l'admin : pas d'inscription publique.
-- **Évolution** : réinitialisation du mot de passe par email, invitation d'un employé par email, jeton de rafraîchissement.
+- **Évolution** : réinitialisation du mot de passe par email, invitation d'un employé par email, option « rester connecté ».
 
 ### 3.2 Équipe — MVP
 
@@ -224,7 +224,7 @@ Establishment ─┬─< User ── Employee >── Position
 
 | Entité | Champs principaux |
 |---|---|
-| `Establishment` | name, address, conventionIdcc, createdAt |
+| `Establishment` | name, address, createdAt |
 | `User` | email (unique), password (hashé), roles, firstName, lastName, isActive, lastLoginAt, establishment, **managedPositions** (ManyToMany Position) |
 | `Position` | name, color, establishment |
 | `Employee` | user (OneToOne), position, contractType (enum), weeklyHours, hiredAt, isActive |
@@ -269,13 +269,22 @@ Establishment ─┬─< User ── Employee >── Position
 |---|---|
 | Back | Symfony (dernière version LTS), PHP 8.3 ou plus |
 | API | **API Platform** (REST, JSON-LD ou JSON) |
-| Base de données | PostgreSQL (ou MySQL) avec Doctrine ORM |
-| Authentification | LexikJWTAuthenticationBundle, gesdinet/jwt-refresh-token-bundle |
-| Sécurité HTTP | NelmioCorsBundle, en-têtes de sécurité (CSP, HSTS…) |
-| Front | React (Vite), React Router |
+| Base de données | MySQL 8.4 (LTS) avec Doctrine ORM |
+| Authentification | SecurityBundle de Symfony, session et `json_login` |
+| Sécurité HTTP | En-têtes de sécurité (CSP, HSTS…) |
+| Front | React (JavaScript, Vite), React Router |
 | Exports | Dompdf (PDF), PhpSpreadsheet (Excel) |
 | Tâches planifiées | Symfony Scheduler |
-| Environnement local | Docker Compose |
+| Environnement local | Symfony CLI (`symfony serve`), serveur de développement Vite, MySQL 8.4 installé dans WSL |
+
+### Même domaine pour le front et l'API
+
+La session repose sur un cookie : React et l'API doivent être servis depuis la même origine.
+
+- **En développement** : le serveur Vite redirige les appels `/api` vers le serveur Symfony (option `proxy` de Vite). Le navigateur ne voit qu'une seule origine.
+- **En production** : le serveur web sert l'application React construite et transmet `/api` à Symfony, sur le même domaine.
+- Conséquence : pas de configuration CORS nécessaire.
+- **Contrainte de déploiement** : héberger le front et l'API sur des domaines différents imposerait CORS et des cookies `SameSite=None`, ce qui affaiblirait la protection CSRF. C'est à éviter, sauf décision documentée (par exemple l'ajout d'une application mobile ou d'une API publique).
 
 ### API Platform
 
@@ -315,7 +324,7 @@ La sécurité est une exigence de premier rang. Servio suit les recommandations 
 - Longueur minimale de 12 caractères, et refus des mots de passe connus pour avoir fuité (contrainte `NotCompromisedPassword`).
 
 **Secrets**
-- Clés JWT, clé de l'API de vision, identifiants de base de données : dans des variables d'environnement, et dans le **coffre de secrets de Symfony** en production.
+- Secret de l'application (`APP_SECRET`), clé de l'API de vision, identifiants de base de données : dans des variables d'environnement, et dans le **coffre de secrets de Symfony** en production.
 - `.env.local` et les clés privées ne sont jamais versionnés. Un scan de secrets (gitleaks) tourne dans la CI.
 - La clé de l'API de vision n'existe que côté Symfony, jamais dans le code React.
 
@@ -323,7 +332,7 @@ La sécurité est une exigence de premier rang. Servio suit les recommandations 
 - Des **groupes de sérialisation** définissent précisément les champs renvoyés pour chaque rôle. Rien n'est exposé par défaut.
 - Les employés ne voient ni les prix, ni la valeur du stock, ni les contrats et compteurs d'heures des collègues.
 - **Isolation par établissement** : une extension API Platform filtre automatiquement toutes les requêtes sur l'établissement de l'utilisateur connecté.
-- **Identifiants UUID** (v7) au lieu d'identifiants qui se suivent (1, 2, 3…), pour empêcher de deviner les ressources. C'est une protection en plus des Voters, pas à leur place.
+- **Identifiants UUID** (v7) au lieu d'identifiants qui se suivent (1, 2, 3…), pour empêcher de deviner les ressources. C'est une protection en plus des Voters, pas à leur place. MySQL n'ayant pas de type UUID natif, ils sont stockés en `BINARY(16)` par le type `uuid` de Doctrine.
 
 **Erreurs et logs**
 - En production (`APP_DEBUG=0`), les erreurs renvoient un message générique, sans trace technique.
@@ -342,12 +351,14 @@ La sécurité est une exigence de premier rang. Servio suit les recommandations 
 
 ### 7.3 Authentification et sessions
 
-- **JWT de courte durée** (15 minutes) avec un **jeton de rafraîchissement** à rotation (gesdinet/jwt-refresh-token-bundle).
-- Les jetons sont stockés dans des **cookies `HttpOnly`, `Secure`, `SameSite=Strict`**, et jamais dans le `localStorage` : un script malveillant ne peut pas les lire.
-- Comme les jetons passent par des cookies, l'API vérifie l'en-tête `Origin` sur chaque requête qui modifie des données, contre les attaques CSRF.
+- **Session Symfony** ouverte par `json_login` sur `/api/login`, fermée par `/api/logout`.
+- Cookie de session **`HttpOnly`, `Secure`, `SameSite=Lax`** : un script malveillant ne peut pas le lire, et il n'est pas envoyé par les requêtes venant d'autres sites. Rien d'autre n'est stocké côté navigateur pour l'authentification (ni jeton, ni `localStorage`).
+- **Protection CSRF** : en plus de `SameSite`, l'API vérifie l'en-tête `Origin` sur chaque requête qui modifie des données (ou utilise la protection CSRF de Symfony).
+- **Régénération de l'identifiant de session** à la connexion, contre la fixation de session (comportement par défaut de Symfony).
+- **Expiration** de la session après une période d'inactivité (par exemple 2 heures).
 - **Limitation des tentatives de connexion** (`login_throttling` de Symfony).
 - Le message d'erreur de connexion est identique que l'email existe ou non, pour ne pas révéler les comptes existants.
-- Désactiver un compte ou changer son mot de passe invalide ses jetons de rafraîchissement.
+- Désactiver un compte ou changer son mot de passe met fin à ses sessions : l'utilisateur est vérifié à chaque requête.
 - Réinitialisation du mot de passe (évolution) : jeton à usage unique, qui expire en moins d'une heure (symfonycasts/reset-password-bundle).
 
 ### 7.4 Contrôle des accès
@@ -409,7 +420,7 @@ La sécurité est une exigence de premier rang. Servio suit les recommandations 
 | `Permissions-Policy` | Autorise l'appareil photo pour Servio uniquement, bloque le reste (micro, géolocalisation…) |
 | `frame-ancestors 'none'` (dans la CSP) | Empêche d'afficher Servio dans un cadre (protection contre le clickjacking) |
 
-- **CORS** restreint au seul domaine du front (NelmioCorsBundle).
+- **Pas de CORS** : le front et l'API partagent la même origine, aucune autre origine n'est autorisée.
 - **Limitation de débit** (Rate Limiter de Symfony) sur la connexion, l'analyse d'étiquettes et l'API en général.
 
 ### 7.11 Dépendances et intégration continue
@@ -441,7 +452,7 @@ Des tests automatisés vérifient chaque protection :
 
 ## 8. Qualité du code
 
-Le code doit être **clair, propre et cohérent**. C'est une exigence au même titre que les fonctionnalités.
+Le code doit être **clair, propre, factorisé et cohérent**. C'est une exigence au même titre que les fonctionnalités.
 
 ### Principes
 
@@ -462,7 +473,8 @@ Le code doit être **clair, propre et cohérent**. C'est une exigence au même t
 
 ### Front (React)
 
-- **TypeScript** pour typer les données reçues de l'API.
+- **JavaScript** moderne (fichiers `.jsx`). TypeScript pourra être adopté plus tard, fichier par fichier.
+- Les données reçues de l'API sont vérifiées et transformées dans la couche dédiée aux appels, pour que les composants reçoivent toujours des données au format attendu.
 - Composants courts, organisés par fonctionnalité (`features/planning`, `features/inventory`…).
 - Les appels à l'API sont regroupés dans une couche dédiée, jamais dispersés dans les composants.
 - La logique réutilisable passe par des **hooks** personnalisés (`usePlanningWeek`, `useAuth`…).
@@ -569,7 +581,7 @@ La landing page est réalisée **à la fin**, avec de vraies captures d'écran.
 
 | Étape | Contenu | Statut |
 |---|---|---|
-| 1. Socle | Projet Symfony et React, Docker, CI (avec audits de sécurité), authentification JWT en cookies, rôles, Voters, isolation par établissement, en-têtes de sécurité, équipe et postes | À faire |
+| 1. Socle | Projet Symfony et React, proxy Vite, CI (avec audits de sécurité), authentification par session, rôles, Voters, isolation par établissement, en-têtes de sécurité, équipe et postes | À faire |
 | 2. Planning | Grille semaine, créneaux, brouillon et publication, règles de planification, impression, exports | À faire |
 | 3. Inventaire | Produits, catégories, fournisseurs, mouvements, sessions, alertes de seuil | À faire |
 | 4. HACCP | Lots, DLC, lecture d'étiquettes, alertes DLC | À faire |
@@ -589,7 +601,7 @@ Chaque étape doit être **terminée et utilisable** avant de passer à la suiva
   - le problème en deux phrases
   - les fonctionnalités
   - la stack et l'architecture
-  - l'installation avec Docker
+  - l'installation en local (Symfony CLI, MySQL 8.4, Node)
   - les comptes de démo
   - les choix techniques (Voters, règles de planification paramétrables, validation humaine de l'OCR…)
 - **Démo en ligne** avec comptes de démonstration.
