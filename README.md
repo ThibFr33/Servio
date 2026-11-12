@@ -12,4 +12,4 @@ Projet en cours de développement.
 
 ## Stack
 
-Symfony · API Platform · React · TypeScript · PostgreSQL · Docker
+Symfony · API Platform · React · MySQL
