@@ -38,3 +38,21 @@ echo "APP_SECRET=$(php -r 'echo bin2hex(random_bytes(32));')" > .env.dev
 ```
 
 `APP_SECRET` signe les jetons CSRF et les liens sécurisés : il doit rester secret et être différent sur chaque machine.
+
+Lancez l'API :
+
+```bash
+symfony serve --no-tls
+```
+
+### Front
+
+Dans un second terminal :
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+L'application est disponible sur http://localhost:5173. Vite redirige les appels `/api` vers Symfony (`127.0.0.1:8000`) : le front et l'API partagent la même origine.
