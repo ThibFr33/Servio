@@ -17,7 +17,7 @@ Ce projet est un projet de portfolio : je dois comprendre et pouvoir expliquer c
 
 ## Stack
 
-- Back : Symfony (LTS), PHP 8.3+, API Platform, Doctrine, MySQL 8.4
+- Back : Symfony 7.4 LTS, PHP 8.3, API Platform, Doctrine, MySQL 8.4
 - Authentification : SecurityBundle de Symfony, session et `json_login` (cookie de session `HttpOnly`)
 - Front : React (JavaScript, fichiers `.jsx`), Vite, React Router
 - Exports : Dompdf, PhpSpreadsheet

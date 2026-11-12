@@ -13,3 +13,28 @@ Projet en cours de développement.
 ## Stack
 
 Symfony · API Platform · React · MySQL
+
+## Installation locale
+
+Prérequis : PHP 8.3, Composer, Symfony CLI, MySQL 8.4, Node 22.
+
+### Back
+
+```bash
+cd backend
+composer install
+```
+
+Créez ensuite `backend/.env.local` (jamais commité) avec vos propres valeurs :
+
+```bash
+DATABASE_URL="mysql://servio:VOTRE_MOT_DE_PASSE@127.0.0.1:3306/servio?serverVersion=8.4&charset=utf8mb4"
+```
+
+Puis générez un `APP_SECRET` propre à votre machine dans `backend/.env.dev` (également ignoré par Git) :
+
+```bash
+echo "APP_SECRET=$(php -r 'echo bin2hex(random_bytes(32));')" > .env.dev
+```
+
+`APP_SECRET` signe les jetons CSRF et les liens sécurisés : il doit rester secret et être différent sur chaque machine.

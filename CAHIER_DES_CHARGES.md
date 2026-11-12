@@ -267,7 +267,7 @@ Establishment ─┬─< User ── Employee >── Position
 
 | Couche | Technologie |
 |---|---|
-| Back | Symfony (dernière version LTS), PHP 8.3 ou plus |
+| Back | Symfony 7.4 (LTS), PHP 8.3 (Symfony 8 demande PHP 8.4) |
 | API | **API Platform** (REST, JSON-LD ou JSON) |
 | Base de données | MySQL 8.4 (LTS) avec Doctrine ORM |
 | Authentification | SecurityBundle de Symfony, session et `json_login` |
