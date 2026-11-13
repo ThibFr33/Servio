@@ -569,7 +569,7 @@ Une page publique qui présente Servio :
 6. Accès à la démo
 7. Pied de page : auteur, GitHub, contact
 
-La landing page est réalisée **à la fin**, avec de vraies captures d'écran.
+La landing page est disponible sur `/` dès le début, illustrée par des dessins SVG faits pour le projet (aucune image sous licence, et ils suivent le mode jour et nuit). L'application elle-même est sur `/app`. De vraies captures d'écran pourront s'ajouter à la fin, quand les écrans existeront.
 
 ### Démo en ligne
 

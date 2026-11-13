@@ -1,9 +1,23 @@
 .login {
   min-height: 100vh;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 16px;
   padding: 16px;
+}
+
+.login__back {
+  width: 100%;
+  max-width: 380px;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  text-decoration: none;
+}
+
+.login__back:hover {
+  color: var(--accent);
 }
 
 .login__card {

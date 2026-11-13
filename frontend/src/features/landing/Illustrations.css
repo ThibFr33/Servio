@@ -1,0 +1,77 @@
+.ill {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.ill--icon {
+  width: 56px;
+}
+
+.ill-surface {
+  fill: var(--bg);
+}
+
+.ill-panel {
+  fill: var(--panel);
+}
+
+.ill-border {
+  stroke: var(--border);
+}
+
+.ill-muted {
+  fill: var(--border);
+}
+
+.ill-line {
+  stroke: var(--text-secondary);
+}
+
+.ill-text {
+  fill: var(--text);
+}
+
+.ill-accent {
+  fill: var(--accent);
+}
+
+.ill-accent-bg {
+  fill: var(--accent-bg);
+}
+
+.ill-accent-stroke {
+  stroke: var(--accent);
+}
+
+.ill-on-accent {
+  stroke: var(--bg);
+}
+
+.ill-on-accent-fill {
+  fill: var(--bg);
+}
+
+.ill-warm {
+  fill: var(--warm);
+}
+
+.ill-warm-bg {
+  fill: var(--warm-bg);
+}
+
+.ill-warm-stroke {
+  stroke: var(--warm);
+}
+
+.ill-teal-bg {
+  fill: var(--teal-bg);
+}
+
+.ill-teal-stroke {
+  stroke: var(--teal);
+}
+
+.ill-teal-line {
+  stroke: var(--teal);
+}

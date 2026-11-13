@@ -1,9 +1,10 @@
 import { Navigate } from 'react-router'
+import { ROUTES } from '../../routes.js'
 import { AUTH_STATUS } from './authContext.js'
 import { useAuth } from './useAuth.js'
 import AuthLoading from './AuthLoading.jsx'
 
-// Only for visitors: a logged-in user who opens the login page goes back home.
+// Only for visitors: a logged-in user who opens the login page goes to the app.
 function GuestRoute({ children }) {
   const { status } = useAuth()
 
@@ -12,7 +13,7 @@ function GuestRoute({ children }) {
   }
 
   if (status === AUTH_STATUS.authenticated) {
-    return <Navigate to="/" replace />
+    return <Navigate to={ROUTES.app} replace />
   }
 
   return children

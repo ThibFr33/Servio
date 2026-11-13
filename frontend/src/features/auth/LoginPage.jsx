@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { Link } from 'react-router'
+import { ROUTES } from '../../routes.js'
 import { useAuth } from './useAuth.js'
 import './LoginPage.css'
 
@@ -10,7 +12,7 @@ function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   // On success there is nothing to do here: the auth status changes and
-  // GuestRoute redirects to the home page.
+  // GuestRoute redirects to the app.
   const handleSubmit = async (event) => {
     event.preventDefault()
     setError(null)
@@ -26,6 +28,9 @@ function LoginPage() {
 
   return (
     <main className="login">
+      <Link className="login__back" to={ROUTES.landing}>
+        ← Retour à l'accueil
+      </Link>
       <form className="login__card" onSubmit={handleSubmit}>
         <h1 className="login__title">Servio</h1>
         <p className="login__subtitle">Connectez-vous à votre espace</p>
