@@ -22,6 +22,7 @@
         "symfony/framework-bundle": "7.4.*",
         "symfony/property-access": "7.4.*",
         "symfony/property-info": "7.4.*",
+        "symfony/rate-limiter": "7.4.*",
         "symfony/runtime": "7.4.*",
         "symfony/security-bundle": "7.4.*",
         "symfony/serializer": "7.4.*",
@@ -78,7 +79,10 @@
             "@php bin/console cache:warmup --env=dev",
             "phpstan analyse --memory-limit=512M"
         ],
-        "test": "phpunit",
+        "test": [
+            "@php bin/console doctrine:migrations:migrate --env=test --no-interaction --allow-no-migration --quiet",
+            "phpunit"
+        ],
         "check": [
             "@cs",
             "@stan",
@@ -104,6 +108,7 @@
         }
     },
     "require-dev": {
+        "dama/doctrine-test-bundle": "^8.8",
         "friendsofphp/php-cs-fixer": "^3.95",
         "phpstan/phpstan": "^2.3",
         "phpstan/phpstan-doctrine": "^2.1",

@@ -51,9 +51,9 @@ Servio est né d'une expérience de manager en restauration. Dans la plupart des
 |---|---|---|
 | `ROLE_ADMIN` | Le gérant | Gère l'établissement, les comptes, les règles de planification. A tous les droits. |
 | `ROLE_MANAGER` | Un responsable d'équipe (chef de cuisine, responsable de salle…) | Gère le planning **des postes qui lui sont rattachés**, gère le stock, valide les inventaires. |
-| `ROLE_EMPLOYE` | Un membre de l'équipe | Consulte le planning, l'exporte, saisit des comptages et des réceptions. |
+| `ROLE_EMPLOYEE` | Un membre de l'équipe | Consulte le planning, l'exporte, saisit des comptages et des réceptions. |
 
-Hiérarchie : `ROLE_ADMIN` hérite de `ROLE_MANAGER`, qui hérite de `ROLE_EMPLOYE`.
+Hiérarchie : `ROLE_ADMIN` hérite de `ROLE_MANAGER`, qui hérite de `ROLE_EMPLOYEE`.
 
 ### Responsables par équipe
 
@@ -225,7 +225,7 @@ Establishment ─┬─< User ── Employee >── Position
 | Entité | Champs principaux |
 |---|---|
 | `Establishment` | name, address, createdAt |
-| `User` | email (unique), password (hashé), roles, firstName, lastName, isActive, lastLoginAt, establishment, **managedPositions** (ManyToMany Position) |
+| `User` | email (unique), password (hashé), role (enum : un seul rôle par utilisateur), firstName, lastName, isActive, lastLoginAt, establishment, **managedPositions** (ManyToMany Position) |
 | `Position` | name, color, establishment |
 | `Employee` | user (OneToOne), position, contractType (enum), weeklyHours, hiredAt, isActive |
 
@@ -321,7 +321,7 @@ La sécurité est une exigence de premier rang. Servio suit les recommandations 
 **Mots de passe**
 - Hashés avec le `PasswordHasher` de Symfony (algorithme `auto`, donc argon2id ou bcrypt).
 - Jamais renvoyés par l'API, jamais écrits dans les logs.
-- Longueur minimale de 12 caractères, et refus des mots de passe connus pour avoir fuité (contrainte `NotCompromisedPassword`).
+- Longueur minimale de 12 caractères. Aucune vérification auprès d'un service en ligne : aucune donnée liée aux mots de passe ne quitte le serveur.
 
 **Secrets**
 - Secret de l'application (`APP_SECRET`), clé de l'API de vision, identifiants de base de données : dans des variables d'environnement, et dans le **coffre de secrets de Symfony** en production.
