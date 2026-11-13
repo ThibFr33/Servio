@@ -17,25 +17,46 @@ Ce projet est un projet de portfolio : je dois comprendre et pouvoir expliquer c
 
 ## Stack
 
-- Back : Symfony (LTS), PHP 8.3+, API Platform, Doctrine, MySQL 8.4
+- Back : Symfony 7.4 LTS, PHP 8.3, API Platform, Doctrine, MySQL 8.4
 - Authentification : SecurityBundle de Symfony, session et `json_login` (cookie de session `HttpOnly`)
 - Front : React (JavaScript, fichiers `.jsx`), Vite, React Router
 - Exports : Dompdf, PhpSpreadsheet
-- Environnement : Symfony CLI, Vite (avec `proxy` vers l'API, même origine), MySQL 8.4 dans WSL, CI GitHub Actions. Pas de Docker.
+- Environnement : Symfony CLI, Vite (avec `proxy` vers l'API, même origine), MySQL 8.4 dans WSL. Pas de Docker, pas de CI : les vérifications se lancent en local.
 
 ## Structure
 
-À confirmer lors de la mise en place du socle :
-
 ```
-backend/    API Symfony
-frontend/   application React
-docs/       documentation et décisions (docs/decisions.md)
+backend/                 API Symfony
+  src/                   code de l'application (namespace App\)
+  tests/                 tests PHPUnit (namespace App\Tests\)
+  config/                configuration Symfony
+frontend/                application React
+  src/api/               appels à l'API (seul endroit où l'on utilise fetch)
+  src/features/<nom>/    une fonctionnalité : composants, hooks, styles, tests
+  src/test/              configuration des tests
+docs/                    documentation et décisions (docs/decisions.md)
 ```
 
 ## Commandes
 
-À compléter lors de la mise en place du socle (lancer l'environnement, tests, PHPStan, PHP-CS-Fixer, ESLint).
+Les commandes Node se lancent dans le shell zsh de l'utilisateur (Node 22 via `.nvmrc`), pas avec le Node 18 du système.
+
+**Back** (dans `backend/`)
+- `symfony serve --no-tls` : lancer l'API sur `127.0.0.1:8000`
+- `composer check` : toutes les vérifications (style, PHPStan, tests, audit des dépendances)
+- `composer test` : tests PHPUnit (base `servio_test`)
+- `composer stan` : PHPStan niveau 8
+- `composer cs` : vérifier le style ; `composer cs:fix` : le corriger
+
+**Front** (dans `frontend/`)
+- `npm run dev` : lancer l'application sur `localhost:5173` (proxy `/api` vers Symfony)
+- `npm run check` : toutes les vérifications (ESLint, Prettier, tests, build, audit des dépendances de production)
+- `npm test` : tests Vitest
+- `npm run lint` : ESLint
+- `npm run format:check` : vérifier le style Prettier ; `npm run format` : le corriger
+- `npm run build` : construire l'application
+
+**Fichiers locaux, jamais commités** (dans `backend/`) : `.env`, `.env.local`, `.env.dev`, `.env.test.local`. Ne jamais lire ni afficher leurs valeurs.
 
 ## Conventions de code
 
@@ -83,4 +104,4 @@ Détails dans la section 7 du cahier des charges.
 
 - Une branche par tâche : `feat/…`, `fix/…`, `refactor/…`, `docs/…`, `chore/…`.
 - Messages de commit en anglais, au format Conventional Commits (`feat: add shift voter`).
-- Fusion par pull request vers `main`, uniquement si la CI est verte.
+- Fusion par pull request vers `main`, uniquement si `composer check` (dans `backend/`) et `npm run check` (dans `frontend/`) passent. Lance-les avant de proposer un commit ou une fusion, et donne le résultat réel.
