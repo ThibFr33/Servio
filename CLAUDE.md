@@ -25,17 +25,36 @@ Ce projet est un projet de portfolio : je dois comprendre et pouvoir expliquer c
 
 ## Structure
 
-À confirmer lors de la mise en place du socle :
-
 ```
-backend/    API Symfony
-frontend/   application React
-docs/       documentation et décisions (docs/decisions.md)
+backend/                 API Symfony
+  src/                   code de l'application (namespace App\)
+  tests/                 tests PHPUnit (namespace App\Tests\)
+  config/                configuration Symfony
+frontend/                application React
+  src/api/               appels à l'API (seul endroit où l'on utilise fetch)
+  src/features/<nom>/    une fonctionnalité : composants, hooks, styles, tests
+  src/test/              configuration des tests
+docs/                    documentation et décisions (docs/decisions.md)
 ```
 
 ## Commandes
 
-À compléter lors de la mise en place du socle (lancer l'environnement, tests, PHPStan, PHP-CS-Fixer, ESLint).
+Les commandes Node se lancent dans le shell zsh de l'utilisateur (Node 22 via `.nvmrc`), pas avec le Node 18 du système.
+
+**Back** (dans `backend/`)
+- `symfony serve --no-tls` : lancer l'API sur `127.0.0.1:8000`
+- `composer test` : tests PHPUnit (base `servio_test`)
+- `composer stan` : PHPStan niveau 8
+- `composer cs` : vérifier le style ; `composer cs:fix` : le corriger
+
+**Front** (dans `frontend/`)
+- `npm run dev` : lancer l'application sur `localhost:5173` (proxy `/api` vers Symfony)
+- `npm test` : tests Vitest
+- `npm run lint` : ESLint
+- `npm run format:check` : vérifier le style Prettier ; `npm run format` : le corriger
+- `npm run build` : construire l'application
+
+**Fichiers locaux, jamais commités** (dans `backend/`) : `.env`, `.env.local`, `.env.dev`, `.env.test.local`. Ne jamais lire ni afficher leurs valeurs.
 
 ## Conventions de code
 
