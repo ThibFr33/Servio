@@ -2,8 +2,13 @@
 framework:
     secret: '%env(APP_SECRET)%'
 
-    # Note that the session will be started ONLY if you read or write from it.
-    session: true
+    # The session is only started when it is read or written (on login).
+    session:
+        cookie_httponly: true
+        cookie_secure: auto
+        cookie_samesite: lax
+        # Logged out after 2 hours of inactivity.
+        gc_maxlifetime: 7200
 
     #esi: true
     #fragments: true

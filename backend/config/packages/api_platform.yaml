@@ -1,7 +1,8 @@
 api_platform:
-    title: Hello API Platform
+    title: Servio API
     version: 1.0.0
     defaults:
-        stateless: true
+        # Authentication relies on the Symfony session cookie, so API operations must not be stateless.
+        stateless: false
         cache_headers:
-            vary: ['Content-Type', 'Authorization', 'Origin']
+            vary: ['Content-Type', 'Cookie', 'Origin']

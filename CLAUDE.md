@@ -28,6 +28,8 @@ Ce projet est un projet de portfolio : je dois comprendre et pouvoir expliquer c
 ```
 backend/                 API Symfony
   src/                   code de l'application (namespace App\)
+  src/Service/<Domaine>/ logique métier
+  tests/Factory/         outils qui créent des données de test (pas des tests)
   tests/                 tests PHPUnit (namespace App\Tests\)
   config/                configuration Symfony
 frontend/                application React
@@ -68,7 +70,8 @@ Les commandes Node se lancent dans le shell zsh de l'utilisateur (Node 22 via `.
 **Back**
 - `declare(strict_types=1);` partout, types sur toutes les propriétés, paramètres et retours.
 - Enums PHP pour les statuts et les types.
-- Logique métier dans des services ; State Processors et contrôleurs fins ; entités sans logique métier.
+- Logique métier dans des services, rangés par domaine dans `src/Service/<Domaine>/` (`Service/User/UserCreator`, plus tard `Service/Planning/…`). State Processors, contrôleurs et commandes restent fins : ils lisent l'entrée, appellent un service et renvoient le résultat. Entités sans logique métier.
+- Une donnée invalide refusée par un service lève une exception dédiée (`src/Exception/`), que l'appelant transforme en message.
 - PSR-12 (PHP-CS-Fixer), PHPStan niveau 8.
 
 **Front**
