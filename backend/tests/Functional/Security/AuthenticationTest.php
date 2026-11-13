@@ -23,6 +23,8 @@ final class AuthenticationTest extends WebTestCase
         // Keep the same kernel between requests, so the session and the login
         // throttling counters live through a whole scenario.
         $this->client->disableReboot();
+        // Like a browser, send the app's own origin with every request (see OriginCheckSubscriber).
+        $this->client->setServerParameter('HTTP_ORIGIN', 'http://localhost');
 
         $container = static::getContainer();
         // Login throttling counters are stored in a cache pool: start each test from zero.

@@ -285,6 +285,7 @@ La session repose sur un cookie : React et l'API doivent être servis depuis la 
 - **En production** : le serveur web sert l'application React construite et transmet `/api` à Symfony, sur le même domaine.
 - Conséquence : pas de configuration CORS nécessaire.
 - **Contrainte de déploiement** : héberger le front et l'API sur des domaines différents imposerait CORS et des cookies `SameSite=None`, ce qui affaiblirait la protection CSRF. C'est à éviter, sauf décision documentée (par exemple l'ajout d'une application mobile ou d'une API publique).
+- **Serveur web devant Symfony** : en production, il faut déclarer le serveur web dans `trusted_proxies`. Sinon, Symfony ne connaît pas la vraie adresse publique, et la vérification de l'en-tête `Origin` refuserait toutes les requêtes.
 
 ### API Platform
 
@@ -353,7 +354,7 @@ La sécurité est une exigence de premier rang. Servio suit les recommandations 
 
 - **Session Symfony** ouverte par `json_login` sur `/api/login`, fermée par `/api/logout`.
 - Cookie de session **`HttpOnly`, `Secure`, `SameSite=Lax`** : un script malveillant ne peut pas le lire, et il n'est pas envoyé par les requêtes venant d'autres sites. Rien d'autre n'est stocké côté navigateur pour l'authentification (ni jeton, ni `localStorage`).
-- **Protection CSRF** : en plus de `SameSite`, l'API vérifie l'en-tête `Origin` sur chaque requête qui modifie des données (ou utilise la protection CSRF de Symfony).
+- **Protection CSRF** : en plus de `SameSite`, toute requête `POST`, `PUT`, `PATCH` ou `DELETE` sur `/api` doit porter un en-tête `Origin` (ou, à défaut, un `Referer`) identique à l'adresse de l'application. Sinon : 403. La vérification a lieu avant l'authentification, ce qui protège aussi la connexion.
 - **Régénération de l'identifiant de session** à la connexion, contre la fixation de session (comportement par défaut de Symfony).
 - **Expiration** de la session après une période d'inactivité (par exemple 2 heures).
 - **Limitation des tentatives de connexion** (`login_throttling` de Symfony).
