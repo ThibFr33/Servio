@@ -1,4 +1,5 @@
 import { Navigate } from 'react-router'
+import { ROUTES } from '../../routes.js'
 import { AUTH_STATUS } from './authContext.js'
 import { useAuth } from './useAuth.js'
 import AuthLoading from './AuthLoading.jsx'
@@ -12,7 +13,7 @@ function ProtectedRoute({ children }) {
   }
 
   if (status === AUTH_STATUS.anonymous) {
-    return <Navigate to="/connexion" replace />
+    return <Navigate to={ROUTES.login} replace />
   }
 
   return children

@@ -110,7 +110,7 @@ describe('authentication screens', () => {
     )
   })
 
-  it('goes to the home page after a successful login', async () => {
+  it('goes to the app after a successful login', async () => {
     const user = userEvent.setup()
     vi.mocked(login).mockResolvedValue(LEA)
     renderApp('/connexion')
@@ -122,25 +122,25 @@ describe('authentication screens', () => {
     ).toBeInTheDocument()
   })
 
-  it('sends a visitor who opens the home page to the login page', async () => {
-    renderApp('/')
+  it('sends a visitor who opens the app to the login page', async () => {
+    renderApp('/app')
 
     expect(
       await screen.findByRole('button', { name: 'Se connecter' }),
     ).toBeInTheDocument()
   })
 
-  it('keeps a logged-in user on the home page after a reload', async () => {
+  it('keeps a logged-in user in the app after a reload', async () => {
     vi.mocked(fetchCurrentUser).mockResolvedValue(LEA)
 
-    renderApp('/')
+    renderApp('/app')
 
     expect(
       await screen.findByRole('heading', { name: 'Bonjour Léa' }),
     ).toBeInTheDocument()
   })
 
-  it('sends a logged-in user who opens the login page back home', async () => {
+  it('sends a logged-in user who opens the login page to the app', async () => {
     vi.mocked(fetchCurrentUser).mockResolvedValue(LEA)
 
     renderApp('/connexion')
@@ -154,7 +154,7 @@ describe('authentication screens', () => {
     const user = userEvent.setup()
     vi.mocked(fetchCurrentUser).mockResolvedValue(LEA)
     vi.mocked(logout).mockResolvedValue(null)
-    renderApp('/')
+    renderApp('/app')
 
     await user.click(
       await screen.findByRole('button', { name: 'Se déconnecter' }),
