@@ -35,6 +35,9 @@
             "symfony/flex": true,
             "symfony/runtime": true
         },
+        "audit": {
+            "abandoned": "report"
+        },
         "bump-after-update": true,
         "sort-packages": true
     },
@@ -75,13 +78,20 @@
             "@php bin/console cache:warmup --env=dev",
             "phpstan analyse --memory-limit=512M"
         ],
-        "test": "phpunit"
+        "test": "phpunit",
+        "check": [
+            "@cs",
+            "@stan",
+            "@test",
+            "@composer audit"
+        ]
     },
     "scripts-descriptions": {
         "cs": "Check the coding style without changing files",
         "cs:fix": "Fix the coding style",
         "stan": "Run PHPStan static analysis",
-        "test": "Run the PHPUnit test suite"
+        "test": "Run the PHPUnit test suite",
+        "check": "Run every check before a merge: style, PHPStan, tests and dependency audit"
     },
     "conflict": {
         "symfony/symfony": "*"

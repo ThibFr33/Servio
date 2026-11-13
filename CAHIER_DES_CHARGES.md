@@ -325,7 +325,7 @@ La sécurité est une exigence de premier rang. Servio suit les recommandations 
 
 **Secrets**
 - Secret de l'application (`APP_SECRET`), clé de l'API de vision, identifiants de base de données : dans des variables d'environnement, et dans le **coffre de secrets de Symfony** en production.
-- `.env.local` et les clés privées ne sont jamais versionnés. Un scan de secrets (gitleaks) tourne dans la CI.
+- `.env`, `.env.local`, `.env.dev`, `.env.test.local` et les clés privées ne sont jamais versionnés. Un scan de secrets (gitleaks) peut être lancé en local avant de pousser.
 - La clé de l'API de vision n'existe que côté Symfony, jamais dans le code React.
 
 **Données exposées par l'API**
@@ -423,13 +423,15 @@ La sécurité est une exigence de premier rang. Servio suit les recommandations 
 - **Pas de CORS** : le front et l'API partagent la même origine, aucune autre origine n'est autorisée.
 - **Limitation de débit** (Rate Limiter de Symfony) sur la connexion, l'analyse d'étiquettes et l'API en général.
 
-### 7.11 Dépendances et intégration continue
+### 7.11 Dépendances et vérifications avant fusion
 
-- `composer audit` et `npm audit` dans la CI : une faille connue dans une dépendance bloque la fusion.
-- **Dependabot** propose les mises à jour de sécurité.
-- **gitleaks** vérifie qu'aucun secret n'est commité.
-- PHPStan et ESLint (avec des règles de sécurité) bloquent les pratiques dangereuses.
-- Analyse automatique **OWASP ZAP** sur l'environnement de démo (évolution).
+Pas d'intégration continue : les vérifications sont lancées en local, avant chaque fusion, avec les commandes `check` (voir section 8).
+
+- `composer audit` et `npm audit --omit=dev` font partie des commandes `check` : une faille connue dans une dépendance de production bloque la fusion.
+- Les **alertes Dependabot** de GitHub (un réglage du dépôt, sans CI) signalent les dépendances vulnérables.
+- Un **scan de secrets** (gitleaks, en local) peut être lancé avant de pousser (facultatif).
+- PHPStan et ESLint (avec des règles de sécurité) signalent les pratiques dangereuses.
+- Analyse **OWASP ZAP** de l'environnement de démo, lancée à la main (évolution).
 
 ### 7.12 Tests de sécurité
 
@@ -486,12 +488,12 @@ Le code doit être **clair, propre, factorisé et cohérent**. C'est une exigenc
 - **Vitest** et **React Testing Library** pour les composants et hooks importants.
 - Priorité aux tests sur les règles métier et la sécurité, là où une erreur coûte le plus cher.
 
-### Git et intégration continue
+### Git et vérifications
 
 - Une branche par fonctionnalité, fusionnée par pull request.
 - Messages de commit au format **Conventional Commits** (`feat:`, `fix:`, `refactor:`…).
-- **GitHub Actions** lance à chaque push : PHP-CS-Fixer, PHPStan, PHPUnit, ESLint et les tests React.
-- Une fusion n'a lieu que si tout est vert.
+- Pas d'intégration continue : avant chaque fusion, on lance en local **`composer check`** (style, PHPStan, PHPUnit, audit) dans `backend/` et **`npm run check`** (ESLint, Prettier, Vitest, build, audit) dans `frontend/`.
+- Une fusion n'a lieu que si les deux commandes passent.
 
 ---
 
@@ -581,7 +583,7 @@ La landing page est réalisée **à la fin**, avec de vraies captures d'écran.
 
 | Étape | Contenu | Statut |
 |---|---|---|
-| 1. Socle | Projet Symfony et React, proxy Vite, CI (avec audits de sécurité), authentification par session, rôles, Voters, isolation par établissement, en-têtes de sécurité, équipe et postes | À faire |
+| 1. Socle | Projet Symfony et React, proxy Vite, outils de qualité et commandes `check` (avec audits de sécurité), authentification par session, rôles, Voters, isolation par établissement, en-têtes de sécurité, équipe et postes | À faire |
 | 2. Planning | Grille semaine, créneaux, brouillon et publication, règles de planification, impression, exports | À faire |
 | 3. Inventaire | Produits, catégories, fournisseurs, mouvements, sessions, alertes de seuil | À faire |
 | 4. HACCP | Lots, DLC, lecture d'étiquettes, alertes DLC | À faire |

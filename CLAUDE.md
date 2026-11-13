@@ -21,7 +21,7 @@ Ce projet est un projet de portfolio : je dois comprendre et pouvoir expliquer c
 - Authentification : SecurityBundle de Symfony, session et `json_login` (cookie de session `HttpOnly`)
 - Front : React (JavaScript, fichiers `.jsx`), Vite, React Router
 - Exports : Dompdf, PhpSpreadsheet
-- Environnement : Symfony CLI, Vite (avec `proxy` vers l'API, même origine), MySQL 8.4 dans WSL, CI GitHub Actions. Pas de Docker.
+- Environnement : Symfony CLI, Vite (avec `proxy` vers l'API, même origine), MySQL 8.4 dans WSL. Pas de Docker, pas de CI : les vérifications se lancent en local.
 
 ## Structure
 
@@ -43,12 +43,14 @@ Les commandes Node se lancent dans le shell zsh de l'utilisateur (Node 22 via `.
 
 **Back** (dans `backend/`)
 - `symfony serve --no-tls` : lancer l'API sur `127.0.0.1:8000`
+- `composer check` : toutes les vérifications (style, PHPStan, tests, audit des dépendances)
 - `composer test` : tests PHPUnit (base `servio_test`)
 - `composer stan` : PHPStan niveau 8
 - `composer cs` : vérifier le style ; `composer cs:fix` : le corriger
 
 **Front** (dans `frontend/`)
 - `npm run dev` : lancer l'application sur `localhost:5173` (proxy `/api` vers Symfony)
+- `npm run check` : toutes les vérifications (ESLint, Prettier, tests, build, audit des dépendances de production)
 - `npm test` : tests Vitest
 - `npm run lint` : ESLint
 - `npm run format:check` : vérifier le style Prettier ; `npm run format` : le corriger
@@ -102,4 +104,4 @@ Détails dans la section 7 du cahier des charges.
 
 - Une branche par tâche : `feat/…`, `fix/…`, `refactor/…`, `docs/…`, `chore/…`.
 - Messages de commit en anglais, au format Conventional Commits (`feat: add shift voter`).
-- Fusion par pull request vers `main`, uniquement si la CI est verte.
+- Fusion par pull request vers `main`, uniquement si `composer check` (dans `backend/`) et `npm run check` (dans `frontend/`) passent. Lance-les avant de proposer un commit ou une fusion, et donne le résultat réel.
