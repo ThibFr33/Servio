@@ -98,7 +98,11 @@ Chaque fonctionnalité est marquée **MVP** (première version) ou **Évolution*
 ### 3.2 Équipe — MVP
 
 - Gestion des postes : nom et couleur (utilisée dans le planning).
-- Fiche employé : poste principal, type de contrat (CDI, CDD, extra, apprenti), heures prévues par semaine, date d'embauche.
+- Fiche employé : prénom, nom, poste principal, type de contrat (CDI, CDD, extra, apprenti), heures prévues par semaine, date d'embauche.
+- Le compte de connexion est **facultatif** : un extra peut être planifié sans jamais se connecter. Un compte se rattache à une fiche pour ceux qui utilisent l'application.
+- Tout le monde voit le nom et le poste de ses collègues (pour le planning). Le contrat, les heures et la date d'embauche ne sont visibles que par l'admin, puis par les managers pour leurs postes.
+- Pas de suppression : un employé qui part est **désactivé**, pour garder l'historique des plannings.
+- Un poste encore attribué à des employés ne peut pas être supprimé.
 - Rattachement des managers à leurs postes.
 
 ### 3.3 Planning — MVP
@@ -227,7 +231,7 @@ Establishment ─┬─< User ── Employee >── Position
 | `Establishment` | name, address, createdAt |
 | `User` | email (unique), password (hashé), role (enum : un seul rôle par utilisateur), firstName, lastName, isActive, lastLoginAt, establishment, **managedPositions** (ManyToMany Position) |
 | `Position` | name, color, establishment |
-| `Employee` | user (OneToOne), position, contractType (enum), weeklyHours, hiredAt, isActive |
+| `Employee` | firstName, lastName, position, contractType (enum), weeklyMinutes (en minutes), hiredAt, active, user (OneToOne, **facultatif**), establishment |
 
 **Planning**
 

@@ -11,6 +11,7 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Repository\PositionRepository;
+use App\State\PositionDeleteProcessor;
 use App\State\PositionProcessor;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
@@ -33,7 +34,7 @@ use Symfony\Component\Validator\Constraints as Assert;
         new Get(security: "is_granted('ROLE_EMPLOYEE')"),
         new Post(security: "is_granted('ROLE_ADMIN')", processor: PositionProcessor::class),
         new Patch(security: "is_granted('ROLE_ADMIN')"),
-        new Delete(security: "is_granted('ROLE_ADMIN')"),
+        new Delete(security: "is_granted('ROLE_ADMIN')", processor: PositionDeleteProcessor::class),
     ],
     normalizationContext: ['groups' => ['position:read']],
     denormalizationContext: ['groups' => ['position:write']],
