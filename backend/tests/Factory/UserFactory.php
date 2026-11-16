@@ -24,12 +24,16 @@ final class UserFactory
     ) {
     }
 
+    /**
+     * Without an establishment, a new one is created for this user.
+     */
     public function create(
         string $email = 'lea@servio.test',
         Role $role = Role::Employee,
         bool $isActive = true,
+        ?Establishment $establishment = null,
     ): User {
-        $establishment = new Establishment('Le Bistrot');
+        $establishment ??= new Establishment('Le Bistrot');
         $user = new User($email, 'Léa', 'Martin', $role, $establishment);
         $user->setPassword($this->passwordHasher->hashPassword($user, self::PASSWORD));
         $user->setIsActive($isActive);
