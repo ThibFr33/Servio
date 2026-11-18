@@ -69,7 +69,7 @@ Exemple : le chef de cuisine gère les postes Cuisine et Plonge, le responsable 
 | Exporter ou imprimer le planning | ✅ | ✅ | ✅ |
 | Créer, modifier, supprimer des créneaux | ❌ | ✅ ses postes | ✅ tous |
 | Publier une semaine | ❌ | ✅ | ✅ |
-| Voir les contrats et compteurs d'heures | ❌ | ✅ ses postes | ✅ |
+| Voir les contrats et compteurs d'heures | ✅ le sien | ✅ le sien et ses postes | ✅ |
 | Saisir des comptages d'inventaire | ✅ | ✅ | ✅ |
 | Enregistrer une réception (photo, lot, DLC) | ✅ | ✅ | ✅ |
 | Valider une session d'inventaire | ❌ | ✅ | ✅ |
@@ -78,7 +78,9 @@ Exemple : le chef de cuisine gère les postes Cuisine et Plonge, le responsable 
 | Gérer les règles de planification | ❌ | ❌ | ✅ |
 | Gérer les comptes et les postes | ❌ | ❌ | ✅ |
 
-Les règles fines (« seulement ses postes ») sont portées par des **Voters** Symfony.
+Les règles fines (« seulement ses postes ») sont portées par des **Voters** Symfony. La règle centrale, « cette personne gère-t-elle ce poste ? », est dans `PositionVoter` : l'admin gère tous les postes de son établissement, un manager seulement ceux qui lui sont rattachés.
+
+Pour voir **son** contrat, un employé doit avoir son compte rattaché à sa fiche employé, ce que fait l'admin.
 
 ---
 
