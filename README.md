@@ -25,19 +25,7 @@ cd backend
 composer install
 ```
 
-Créez ensuite `backend/.env.local` (jamais commité) avec vos propres valeurs :
-
-```bash
-DATABASE_URL="mysql://servio:VOTRE_MOT_DE_PASSE@127.0.0.1:3306/servio?serverVersion=8.4&charset=utf8mb4"
-```
-
-Puis générez un `APP_SECRET` propre à votre machine dans `backend/.env.dev` (également ignoré par Git) :
-
-```bash
-echo "APP_SECRET=$(php -r 'echo bin2hex(random_bytes(32));')" > .env.dev
-```
-
-`APP_SECRET` signe les jetons CSRF et les liens sécurisés : il doit rester secret et être différent sur chaque machine.
+Définissez `DATABASE_URL` (connexion à votre base MySQL) dans `backend/.env.local`, et `APP_SECRET` (une chaîne aléatoire propre à votre machine) dans `backend/.env.dev`. Ces deux fichiers sont ignorés par Git.
 
 Lancez l'API :
 
