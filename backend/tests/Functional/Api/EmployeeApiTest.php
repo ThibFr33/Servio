@@ -7,6 +7,7 @@ namespace App\Tests\Functional\Api;
 use App\Entity\Employee;
 use App\Entity\Establishment;
 use App\Entity\Position;
+use App\Entity\User;
 use App\Enum\Role;
 use App\Tests\Factory\EmployeeFactory;
 use App\Tests\Factory\PositionFactory;
@@ -217,10 +218,128 @@ final class EmployeeApiTest extends WebTestCase
         $this->findEmployee('Karim');
     }
 
-    private function logInAs(Role $role): void
+    public function testManagerSeesContractDetailsOnlyForTheirPositions(): void
+    {
+        $floor = (new PositionFactory($this->entityManager))->create($this->bistrot, 'Salle');
+        $this->employees->create($this->kitchen, 'Karim');
+        $this->employees->create($floor, 'Sarah');
+        $manager = $this->logInAs(Role::Manager);
+        $manager->addManagedPosition($this->kitchen);
+        $this->entityManager->flush();
+
+        $this->send('GET', '/api/employees');
+
+        self::assertResponseIsSuccessful();
+        $byFirstName = array_column($this->members(), null, 'firstName');
+        self::assertSame('cdi', $byFirstName['Karim']['contractType']);
+        self::assertArrayNotHasKey('contractType', $byFirstName['Sarah']);
+    }
+
+    public function testEmployeeSeesTheirOwnContractOnly(): void
+    {
+        $hugo = $this->logInAs(Role::Employee);
+        $this->linkAccount($this->employees->create($this->kitchen, 'Hugo'), $hugo);
+        $this->employees->create($this->kitchen, 'Karim');
+
+        $this->send('GET', '/api/employees');
+
+        self::assertResponseIsSuccessful();
+        $byFirstName = array_column($this->members(), null, 'firstName');
+        self::assertSame(35 * 60, $byFirstName['Hugo']['weeklyMinutes']);
+        self::assertArrayNotHasKey('weeklyMinutes', $byFirstName['Karim']);
+        self::assertArrayNotHasKey('user', $byFirstName['Hugo']);
+    }
+
+    public function testAdminLinksAnAccountToAnEmployee(): void
+    {
+        $karim = $this->employees->create($this->kitchen, 'Karim');
+        $account = $this->users->create('karim@servio.test', Role::Employee, establishment: $this->bistrot);
+        $this->logInAs(Role::Admin);
+
+        $this->send('PATCH', $this->employeeIri($karim), ['user' => $this->userIri($account)]);
+
+        self::assertResponseIsSuccessful();
+        self::assertSame($this->userIri($account), $this->responseData()['user']);
+    }
+
+    public function testOnlyAnAdminCanLinkAnAccount(): void
+    {
+        $karim = $this->employees->create($this->kitchen, 'Karim');
+        $account = $this->users->create('karim@servio.test', Role::Employee, establishment: $this->bistrot);
+        $manager = $this->logInAs(Role::Manager);
+        $manager->addManagedPosition($this->kitchen);
+        $this->entityManager->flush();
+
+        $this->send('PATCH', $this->employeeIri($karim), ['user' => $this->userIri($account)]);
+
+        self::assertResponseStatusCodeSame(403);
+    }
+
+    public function testAnAccountOfAnotherEstablishmentCannotBeLinked(): void
+    {
+        $karim = $this->employees->create($this->kitchen, 'Karim');
+        $stranger = $this->users->create('ines@brasserie.test', Role::Employee, establishment: $this->brasserie);
+        $this->logInAs(Role::Admin);
+
+        $this->send('PATCH', $this->employeeIri($karim), ['user' => $this->userIri($stranger)]);
+
+        self::assertResponseStatusCodeSame(422);
+        self::assertSame('user', $this->responseData()['violations'][0]['propertyPath']);
+    }
+
+    public function testAnAccountAlreadyLinkedToAnotherEmployeeIsRejected(): void
+    {
+        $account = $this->users->create('karim@servio.test', Role::Employee, establishment: $this->bistrot);
+        $this->linkAccount($this->employees->create($this->kitchen, 'Karim'), $account);
+        $hugo = $this->employees->create($this->kitchen, 'Hugo');
+        $this->logInAs(Role::Admin);
+
+        $this->send('PATCH', $this->employeeIri($hugo), ['user' => $this->userIri($account)]);
+
+        self::assertResponseStatusCodeSame(422);
+        self::assertSame('Ce compte est déjà rattaché à une autre fiche.', $this->responseData()['violations'][0]['message']);
+    }
+
+    public function testCurrentEmployeeIsReturnedWithTheirContract(): void
+    {
+        $hugo = $this->logInAs(Role::Employee);
+        $this->linkAccount($this->employees->create($this->kitchen, 'Hugo'), $hugo);
+
+        $this->send('GET', '/api/me/employee');
+
+        self::assertResponseIsSuccessful();
+        $data = $this->responseData();
+        self::assertSame('Hugo', $data['firstName']);
+        self::assertSame('cdi', $data['contractType']);
+        self::assertSame('2025-03-01', $data['hiredAt']);
+    }
+
+    public function testCurrentEmployeeIsNotFoundWhenNoProfileIsLinked(): void
+    {
+        $this->logInAs(Role::Employee);
+
+        $this->send('GET', '/api/me/employee');
+
+        self::assertResponseStatusCodeSame(404);
+    }
+
+    private function logInAs(Role $role): User
     {
         $user = $this->users->create(strtolower($role->name).'@servio.test', $role, establishment: $this->bistrot);
         $this->client->loginUser($user);
+
+        return $user;
+    }
+
+    private function linkAccount(Employee $employee, User $account): void
+    {
+        $employee->setUser($account);
+        $this->entityManager->flush();
+    }
+
+    private function userIri(User $user): string
+    {
+        return '/api/users/'.$user->getId()->toRfc4122();
     }
 
     /**

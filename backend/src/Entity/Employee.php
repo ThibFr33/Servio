@@ -11,10 +11,12 @@ use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Enum\ContractType;
 use App\Repository\EmployeeRepository;
+use App\State\CurrentEmployeeProvider;
 use App\State\EmployeeProcessor;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Serializer\Attribute\Context;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
@@ -25,15 +27,24 @@ use Symfony\Component\Validator\Constraints as Assert;
  * A member of the team, as shown in the planning. A login account is optional:
  * an extra who never uses the app can still be planned.
  *
- * Everyone can see a colleague's name and position; contract details are added
- * for admins by EmployeeContextBuilder. There is no DELETE: an employee who
- * leaves is deactivated, so past plannings keep their history.
+ * Everyone can see a colleague's name and position; EmployeeNormalizer adds the
+ * contract details for whoever manages the employee's position, and for the
+ * employee themself. There is no DELETE: an employee who leaves is deactivated,
+ * so past plannings keep their history.
  */
 #[ORM\Entity(repositoryClass: EmployeeRepository::class)]
+#[UniqueEntity(fields: ['user'], message: 'Ce compte est déjà rattaché à une autre fiche.', ignoreNull: true)]
 #[ApiResource(
     operations: [
         new GetCollection(security: "is_granted('ROLE_EMPLOYEE')"),
         new Get(security: "is_granted('ROLE_EMPLOYEE')"),
+        new Get(
+            uriTemplate: '/me/employee',
+            uriVariables: [],
+            security: "is_granted('ROLE_EMPLOYEE')",
+            provider: CurrentEmployeeProvider::class,
+            name: 'api_me_employee',
+        ),
         new Post(security: "is_granted('ROLE_ADMIN')", processor: EmployeeProcessor::class),
         new Patch(security: "is_granted('ROLE_ADMIN')"),
     ],
@@ -46,6 +57,7 @@ class Employee
 {
     public const GROUP_READ = 'employee:read';
     public const GROUP_READ_CONTRACT = 'employee:read:contract';
+    public const GROUP_READ_ACCOUNT = 'employee:read:account';
     public const GROUP_WRITE = 'employee:write';
 
     public const NAME_MAX_LENGTH = 100;
@@ -99,10 +111,11 @@ class Employee
     private bool $active = true;
 
     /**
-     * Optional login account. Not exposed through the API yet.
+     * Optional login account, linked by an admin. Only admins see which account it is.
      */
     #[ORM\OneToOne]
     #[ORM\JoinColumn(nullable: true, unique: true)]
+    #[Groups([self::GROUP_READ_ACCOUNT, self::GROUP_WRITE])]
     private ?User $user = null;
 
     /**
