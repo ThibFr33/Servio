@@ -1,11 +1,14 @@
-.positions {
+/* Shared by the administration screens (positions, team…), so they look and
+   behave alike. Colours only come from the theme variables. */
+
+.admin-page {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  max-width: 720px;
+  max-width: 760px;
 }
 
-.positions__header {
+.admin-page__header {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
@@ -14,19 +17,19 @@
   margin-bottom: 8px;
 }
 
-.positions__title {
+.admin-page__title {
   margin: 0 0 4px;
   font-size: 1.75rem;
   font-weight: 600;
 }
 
-.positions__subtitle,
-.positions__status {
+.admin-page__subtitle,
+.admin-status {
   margin: 0;
   color: var(--text-secondary);
 }
 
-.positions__list {
+.admin-list {
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -35,54 +38,57 @@
   list-style: none;
 }
 
-.positions__actions {
+.admin-actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
 }
 
-.positions__button {
+.admin-button {
+  display: inline-flex;
+  align-items: center;
   padding: 7px 14px;
   border: 1px solid var(--border);
   border-radius: 10px;
   font: inherit;
   font-size: 0.9rem;
   color: var(--text);
+  text-decoration: none;
   background: transparent;
   cursor: pointer;
 }
 
-.positions__button:hover {
+.admin-button:hover {
   background: var(--panel);
 }
 
-.positions__button:disabled {
+.admin-button:disabled {
   opacity: 0.7;
   cursor: progress;
 }
 
-.positions__button--primary {
+.admin-button--primary {
   border-color: var(--accent);
   color: var(--bg);
   background: var(--accent);
 }
 
-.positions__button--primary:hover {
+.admin-button--primary:hover {
   background: var(--accent);
   opacity: 0.9;
 }
 
-.positions__button--danger {
+.admin-button--danger {
   border-color: var(--danger);
   color: var(--danger);
 }
 
-.positions__button--danger:hover {
+.admin-button--danger:hover {
   background: var(--danger-bg);
 }
 
-.positions__error {
+.admin-error {
   margin: 0;
   padding: 10px 12px;
   border-radius: 10px;
@@ -91,7 +97,7 @@
   background: var(--danger-bg);
 }
 
-.position-card {
+.admin-card {
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -101,20 +107,74 @@
   background: var(--bg);
 }
 
-.position-card--new {
+.admin-card--new {
   background: var(--panel);
 }
 
-.position-card__summary {
+/* A deactivated record stays readable, only quieter. */
+.admin-card--inactive {
+  background: var(--panel);
+}
+
+.admin-card--inactive .admin-card__title,
+.admin-card--inactive .admin-swatch {
+  opacity: 0.6;
+}
+
+.admin-badge {
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: var(--bg);
+  box-shadow: 0 0 0 1px var(--border);
+}
+
+.admin-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.admin-toggle input {
+  accent-color: var(--accent);
+}
+
+.admin-card__summary {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 12px;
 }
 
-/* The colour is chosen by the admin: shown as a dot only, never behind text,
-   so it can never make a label unreadable. */
-.position-card__swatch {
+.admin-card__main {
+  flex: 1;
+  min-width: 0;
+}
+
+.admin-card__title {
+  font-weight: 500;
+}
+
+.admin-card__details {
+  margin: 4px 0 0;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.admin-card__question {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+/* A colour chosen by the admin: shown as a dot only, never behind text, so it
+   can never make a label unreadable. */
+.admin-swatch {
   flex-shrink: 0;
   width: 16px;
   height: 16px;
@@ -122,29 +182,19 @@
   box-shadow: 0 0 0 1px var(--border);
 }
 
-.position-card__name {
-  flex: 1;
-  font-weight: 500;
-}
-
-.position-card__question {
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-}
-
-.position-form {
+.admin-form {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.position-form__fields {
+.admin-form__fields {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
 }
 
-.position-form__field {
+.admin-field {
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -152,12 +202,13 @@
   font-weight: 500;
 }
 
-.position-form__field--name {
+.admin-field--grow {
   flex: 1;
   min-width: 200px;
 }
 
-.position-form__field input {
+.admin-field input,
+.admin-field select {
   padding: 9px 12px;
   border: 1px solid var(--border);
   border-radius: 10px;
@@ -167,24 +218,25 @@
   background: var(--panel);
 }
 
-.position-form__field input[type='color'] {
+.admin-field input[type='color'] {
   width: 64px;
   height: 40px;
   padding: 4px;
   cursor: pointer;
 }
 
-.position-form__field input:focus-visible,
-.positions__button:focus-visible {
+.admin-field input:focus-visible,
+.admin-field select:focus-visible,
+.admin-button:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 1px;
 }
 
-.position-form__field input[aria-invalid='true'] {
+.admin-field [aria-invalid='true'] {
   border-color: var(--danger);
 }
 
-.position-form__field-error {
+.admin-field__error {
   font-weight: 400;
   color: var(--danger);
 }

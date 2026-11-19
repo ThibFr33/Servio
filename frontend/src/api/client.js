@@ -53,6 +53,24 @@ export async function apiFetch(path, { method = 'GET', body, signal } = {}) {
   return response.json()
 }
 
+// API Platform splits a collection into pages of 30 items: follow the "next"
+// link of each page to return every item. Its links already start with /api.
+export async function fetchCollection(path, { signal } = {}) {
+  const items = []
+  let nextPath = path
+
+  while (nextPath) {
+    const page = await apiFetch(nextPath, { signal })
+    items.push(...(page.member ?? page['hydra:member'] ?? []))
+
+    const view = page.view ?? page['hydra:view']
+    const next = view?.next ?? view?.['hydra:next']
+    nextPath = next ? next.replace(API_BASE_URL, '') : null
+  }
+
+  return items
+}
+
 async function toApiError(response) {
   let data
   try {

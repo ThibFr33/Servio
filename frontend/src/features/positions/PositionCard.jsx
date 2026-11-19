@@ -34,7 +34,7 @@ function PositionCard({ position, onUpdate, onDelete }) {
 
   if (mode === MODES.edit) {
     return (
-      <li className="position-card">
+      <li className="admin-card">
         <PositionForm
           initialValues={position}
           submitLabel="Enregistrer"
@@ -46,22 +46,22 @@ function PositionCard({ position, onUpdate, onDelete }) {
   }
 
   return (
-    <li className="position-card">
-      <div className="position-card__summary">
+    <li className="admin-card">
+      <div className="admin-card__summary">
         <span
-          className="position-card__swatch"
+          className="admin-swatch"
           style={{ backgroundColor: position.color }}
           aria-hidden="true"
         />
-        <span className="position-card__name">{position.name}</span>
+        <span className="admin-card__title admin-card__main">
+          {position.name}
+        </span>
 
         {mode === MODES.confirmDelete ? (
-          <div className="positions__actions">
-            <span className="position-card__question">
-              Supprimer ce poste ?
-            </span>
+          <div className="admin-actions">
+            <span className="admin-card__question">Supprimer ce poste ?</span>
             <button
-              className="positions__button positions__button--danger"
+              className="admin-button admin-button--danger"
               type="button"
               onClick={handleDelete}
               disabled={isDeleting}
@@ -69,7 +69,7 @@ function PositionCard({ position, onUpdate, onDelete }) {
               Oui, supprimer
             </button>
             <button
-              className="positions__button"
+              className="admin-button"
               type="button"
               onClick={() => showMode(MODES.view)}
             >
@@ -77,9 +77,9 @@ function PositionCard({ position, onUpdate, onDelete }) {
             </button>
           </div>
         ) : (
-          <div className="positions__actions">
+          <div className="admin-actions">
             <button
-              className="positions__button"
+              className="admin-button"
               type="button"
               onClick={() => showMode(MODES.edit)}
               aria-label={`Modifier le poste ${position.name}`}
@@ -87,7 +87,7 @@ function PositionCard({ position, onUpdate, onDelete }) {
               Modifier
             </button>
             <button
-              className="positions__button"
+              className="admin-button"
               type="button"
               onClick={() => showMode(MODES.confirmDelete)}
               aria-label={`Supprimer le poste ${position.name}`}
@@ -99,7 +99,7 @@ function PositionCard({ position, onUpdate, onDelete }) {
       </div>
 
       {error && (
-        <p className="positions__error" role="alert">
+        <p className="admin-error" role="alert">
           {error}
         </p>
       )}

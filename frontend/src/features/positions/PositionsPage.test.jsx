@@ -39,7 +39,7 @@ async function renderPage(positions = [SALLE, ECAILLER, BAR]) {
 const listedNames = () =>
   within(screen.getByRole('list', { name: 'Liste des postes' }))
     .getAllByRole('listitem')
-    .map((item) => item.querySelector('.position-card__name')?.textContent)
+    .map((item) => item.querySelector('.admin-card__title')?.textContent)
 
 describe('positions page', () => {
   beforeEach(() => {
