@@ -1,5 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { ApiError, apiFetch, NETWORK_ERROR_MESSAGE } from './client.js'
+import {
+  ApiError,
+  apiFetch,
+  INVALID_FORM_MESSAGE,
+  NETWORK_ERROR_MESSAGE,
+} from './client.js'
 
 function stubFetch(implementation) {
   vi.stubGlobal('fetch', vi.fn(implementation))
@@ -10,7 +15,7 @@ describe('apiFetch', () => {
     vi.unstubAllGlobals()
   })
 
-  it('sends a JSON body to a relative /api URL', async () => {
+  it('sends a JSON-LD body to a relative /api URL', async () => {
     stubFetch(async () => Response.json({ ok: true }))
 
     await apiFetch('/login', { method: 'POST', body: { email: 'a@b.c' } })
@@ -18,8 +23,26 @@ describe('apiFetch', () => {
     const [url, options] = vi.mocked(fetch).mock.calls[0]
     expect(url).toBe('/api/login')
     expect(options.method).toBe('POST')
-    expect(options.headers['Content-Type']).toBe('application/json')
+    expect(options.headers['Content-Type']).toBe('application/ld+json')
     expect(options.body).toBe('{"email":"a@b.c"}')
+  })
+
+  it('sends a PATCH as a merge-patch, which only changes the given fields', async () => {
+    stubFetch(async () => Response.json({ ok: true }))
+
+    await apiFetch('/positions/1', { method: 'PATCH', body: { name: 'Bar' } })
+
+    const [, options] = vi.mocked(fetch).mock.calls[0]
+    expect(options.headers['Content-Type']).toBe('application/merge-patch+json')
+  })
+
+  it('sends no Content-Type without a body', async () => {
+    stubFetch(async () => Response.json({ ok: true }))
+
+    await apiFetch('/positions')
+
+    const [, options] = vi.mocked(fetch).mock.calls[0]
+    expect(options.headers['Content-Type']).toBeUndefined()
   })
 
   it('returns null for an empty 204 response', async () => {
@@ -38,6 +61,50 @@ describe('apiFetch', () => {
     expect(error).toBeInstanceOf(ApiError)
     expect(error.status).toBe(401)
     expect(error.message).toBe('Identifiants invalides.')
+  })
+
+  it('reads the message API Platform puts in "detail"', async () => {
+    stubFetch(async () =>
+      Response.json(
+        { detail: 'Ce poste est encore attribué à des employés.' },
+        { status: 409 },
+      ),
+    )
+
+    const error = await apiFetch('/positions/1', { method: 'DELETE' }).catch(
+      (caught) => caught,
+    )
+
+    expect(error.status).toBe(409)
+    expect(error.message).toBe('Ce poste est encore attribué à des employés.')
+  })
+
+  it('maps validation errors to their field', async () => {
+    stubFetch(async () =>
+      Response.json(
+        {
+          detail: 'name: Ce nom est déjà utilisé.',
+          violations: [
+            { propertyPath: 'name', message: 'Ce nom est déjà utilisé.' },
+            { propertyPath: 'name', message: 'Un second message.' },
+            { propertyPath: 'managedPositions[0]', message: 'Poste inconnu.' },
+          ],
+        },
+        { status: 422 },
+      ),
+    )
+
+    const error = await apiFetch('/positions', {
+      method: 'POST',
+      body: { name: 'Cuisine' },
+    }).catch((caught) => caught)
+
+    expect(error.status).toBe(422)
+    expect(error.message).toBe(INVALID_FORM_MESSAGE)
+    expect(error.fieldErrors).toEqual({
+      name: 'Ce nom est déjà utilisé.',
+      managedPositions: 'Poste inconnu.',
+    })
   })
 
   it('uses a generic message when the error body is not JSON', async () => {

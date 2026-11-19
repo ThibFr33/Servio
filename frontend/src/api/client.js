@@ -1,22 +1,30 @@
 const API_BASE_URL = '/api'
 
 export const NETWORK_ERROR_MESSAGE = 'Impossible de joindre le serveur.'
+export const INVALID_FORM_MESSAGE = 'Certains champs sont invalides.'
+
+// API Platform reads JSON-LD, and a PATCH only changes the fields it sends
+// (merge-patch). json_login accepts JSON-LD as well.
+const JSON_LD = 'application/ld+json'
+const MERGE_PATCH = 'application/merge-patch+json'
 
 export class ApiError extends Error {
   // status is 0 when the server could not be reached at all.
-  constructor(status, message) {
+  // fieldErrors maps a field name to its message, for validation errors (422).
+  constructor(status, message, fieldErrors = {}) {
     super(message)
     this.name = 'ApiError'
     this.status = status
+    this.fieldErrors = fieldErrors
   }
 }
 
 // Relative URLs keep every call on the app's own origin: the browser then adds
 // the session cookie and the Origin header by itself (credentials: 'same-origin').
 export async function apiFetch(path, { method = 'GET', body, signal } = {}) {
-  const headers = { Accept: 'application/ld+json, application/json' }
+  const headers = { Accept: `${JSON_LD}, application/json` }
   if (body !== undefined) {
-    headers['Content-Type'] = 'application/json'
+    headers['Content-Type'] = method === 'PATCH' ? MERGE_PATCH : JSON_LD
   }
 
   let response
@@ -35,7 +43,7 @@ export async function apiFetch(path, { method = 'GET', body, signal } = {}) {
   }
 
   if (!response.ok) {
-    throw new ApiError(response.status, await readErrorMessage(response))
+    throw await toApiError(response)
   }
 
   if (response.status === 204) {
@@ -45,15 +53,41 @@ export async function apiFetch(path, { method = 'GET', body, signal } = {}) {
   return response.json()
 }
 
-async function readErrorMessage(response) {
+async function toApiError(response) {
+  let data
   try {
-    const data = await response.json()
-    if (typeof data.error === 'string') {
-      return data.error
-    }
+    data = await response.json()
   } catch {
     // The body is not JSON: fall back to the generic message below.
   }
 
-  return `Une erreur est survenue (${response.status}).`
+  if (Array.isArray(data?.violations)) {
+    return new ApiError(
+      response.status,
+      INVALID_FORM_MESSAGE,
+      toFieldErrors(data.violations),
+    )
+  }
+
+  // Our own controllers send "error"; API Platform sends "detail".
+  const message = [data?.error, data?.detail].find(
+    (candidate) => typeof candidate === 'string' && candidate !== '',
+  )
+
+  return new ApiError(
+    response.status,
+    message ?? `Une erreur est survenue (${response.status}).`,
+  )
+}
+
+// "managedPositions[0]" and "managedPositions" both belong to the same field.
+// The first message of a field is enough to show under it.
+function toFieldErrors(violations) {
+  const fieldErrors = {}
+  for (const { propertyPath, message } of violations) {
+    const field = String(propertyPath ?? '').split(/[.[]/)[0]
+    fieldErrors[field] ??= message
+  }
+
+  return fieldErrors
 }

@@ -3,4 +3,6 @@ export const ROUTES = {
   landing: '/',
   login: '/connexion',
   app: '/app',
+  positions: '/app/postes',
+  team: '/app/equipe',
 }
