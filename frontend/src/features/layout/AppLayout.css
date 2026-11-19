@@ -1,0 +1,106 @@
+.app {
+  min-height: 100vh;
+}
+
+.app__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 24px;
+  padding: 14px 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.app__brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.app__logo {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  color: var(--bg);
+  background: var(--accent);
+}
+
+.app__nav {
+  display: flex;
+  gap: 4px;
+}
+
+.app__nav-link {
+  padding: 7px 12px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-decoration: none;
+}
+
+.app__nav-link:hover {
+  color: var(--text);
+  background: var(--panel);
+}
+
+/* NavLink adds the "active" class on the link of the current page. */
+.app__nav-link.active {
+  color: var(--accent);
+  background: var(--accent-bg);
+}
+
+.app__account {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
+
+.app__user {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+}
+
+.app__logout {
+  padding: 7px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--text);
+  background: transparent;
+  cursor: pointer;
+}
+
+.app__logout:hover {
+  background: var(--panel);
+}
+
+.app__error {
+  margin: 0;
+  padding: 10px 24px;
+  color: var(--danger);
+  background: var(--danger-bg);
+}
+
+.app__main {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+
+@media (max-width: 600px) {
+  .app__header,
+  .app__main {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
