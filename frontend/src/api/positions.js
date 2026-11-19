@@ -1,4 +1,4 @@
-import { apiFetch } from './client.js'
+import { apiFetch, fetchCollection } from './client.js'
 
 // The components only see plain objects: the JSON-LD details (@id, member…)
 // stay in this file.
@@ -12,10 +12,8 @@ function toPosition(data) {
   }
 }
 
-// A collection is small enough to fit in the first page (30 items).
 export async function fetchPositions(signal) {
-  const data = await apiFetch('/positions', { signal })
-  const members = data.member ?? data['hydra:member'] ?? []
+  const members = await fetchCollection('/positions', { signal })
 
   return members.map(toPosition)
 }

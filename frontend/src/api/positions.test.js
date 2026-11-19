@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { apiFetch } from './client.js'
+import { apiFetch, fetchCollection } from './client.js'
 import {
   createPosition,
   deletePosition,
@@ -7,7 +7,10 @@ import {
   updatePosition,
 } from './positions.js'
 
-vi.mock('./client.js', () => ({ apiFetch: vi.fn() }))
+vi.mock('./client.js', () => ({
+  apiFetch: vi.fn(),
+  fetchCollection: vi.fn(),
+}))
 
 const KITCHEN_ID = '01a1d545-d141-7347-91a3-ae61caacdc27'
 
@@ -31,14 +34,13 @@ describe('positions API', () => {
     vi.resetAllMocks()
   })
 
-  it('turns the JSON-LD collection into plain positions', async () => {
-    vi.mocked(apiFetch).mockResolvedValue({
-      '@context': '/api/contexts/Position',
-      member: [kitchenFromApi],
-      totalItems: 1,
-    })
+  it('turns the JSON-LD items into plain positions', async () => {
+    vi.mocked(fetchCollection).mockResolvedValue([kitchenFromApi])
 
     expect(await fetchPositions()).toEqual([kitchen])
+    expect(fetchCollection).toHaveBeenCalledWith('/positions', {
+      signal: undefined,
+    })
   })
 
   it('creates a position with its name and colour only', async () => {

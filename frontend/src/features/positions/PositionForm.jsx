@@ -1,4 +1,5 @@
-import { useId, useState } from 'react'
+import { useState } from 'react'
+import FormField from '../admin/FormField.jsx'
 
 // Same limit as Position::NAME_MAX_LENGTH: the browser stops the typing, the
 // API still checks it.
@@ -21,7 +22,6 @@ function PositionForm({
   const [fieldErrors, setFieldErrors] = useState({})
   const [error, setError] = useState(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const id = useId()
 
   // On success the parent closes the form, so the state is only reset on failure.
   const handleSubmit = async (event) => {
@@ -40,72 +40,44 @@ function PositionForm({
   }
 
   return (
-    <form className="position-form" onSubmit={handleSubmit}>
-      <div className="position-form__fields">
-        {/* The error stays outside the label, so it is not read as part of
-            the field name, and aria-describedby links it to the field. */}
-        <div className="position-form__field position-form__field--name">
-          <label htmlFor={`${id}-name`}>Nom</label>
+    <form className="admin-form" onSubmit={handleSubmit}>
+      <div className="admin-form__fields">
+        <FormField label="Nom" error={fieldErrors.name} grow>
           <input
-            id={`${id}-name`}
             type="text"
             name="name"
             required
             maxLength={POSITION_NAME_MAX_LENGTH}
             value={name}
             onChange={(event) => setName(event.target.value)}
-            aria-invalid={fieldErrors.name ? true : undefined}
-            aria-describedby={fieldErrors.name ? `${id}-name-error` : undefined}
           />
-          {fieldErrors.name && (
-            <span
-              className="position-form__field-error"
-              id={`${id}-name-error`}
-            >
-              {fieldErrors.name}
-            </span>
-          )}
-        </div>
+        </FormField>
 
-        <div className="position-form__field">
-          <label htmlFor={`${id}-color`}>Couleur</label>
+        <FormField label="Couleur" error={fieldErrors.color}>
           <input
-            id={`${id}-color`}
             type="color"
             name="color"
             value={color}
             onChange={(event) => setColor(event.target.value)}
-            aria-invalid={fieldErrors.color ? true : undefined}
-            aria-describedby={
-              fieldErrors.color ? `${id}-color-error` : undefined
-            }
           />
-          {fieldErrors.color && (
-            <span
-              className="position-form__field-error"
-              id={`${id}-color-error`}
-            >
-              {fieldErrors.color}
-            </span>
-          )}
-        </div>
+        </FormField>
       </div>
 
       {error && (
-        <p className="positions__error" role="alert">
+        <p className="admin-error" role="alert">
           {error}
         </p>
       )}
 
-      <div className="positions__actions">
+      <div className="admin-actions">
         <button
-          className="positions__button positions__button--primary"
+          className="admin-button admin-button--primary"
           type="submit"
           disabled={isSubmitting}
         >
           {submitLabel}
         </button>
-        <button className="positions__button" type="button" onClick={onCancel}>
+        <button className="admin-button" type="button" onClick={onCancel}>
           Annuler
         </button>
       </div>

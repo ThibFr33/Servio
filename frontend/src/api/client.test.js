@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   ApiError,
   apiFetch,
+  fetchCollection,
   INVALID_FORM_MESSAGE,
   NETWORK_ERROR_MESSAGE,
 } from './client.js'
@@ -105,6 +106,27 @@ describe('apiFetch', () => {
       name: 'Ce nom est déjà utilisé.',
       managedPositions: 'Poste inconnu.',
     })
+  })
+
+  it('follows the pages of a collection until the last one', async () => {
+    stubFetch(async (url) =>
+      Response.json(
+        url === '/api/employees'
+          ? {
+              member: [{ id: 1 }, { id: 2 }],
+              view: { next: '/api/employees?page=2' },
+            }
+          : { member: [{ id: 3 }], view: {} },
+      ),
+    )
+
+    const items = await fetchCollection('/employees')
+
+    expect(items).toEqual([{ id: 1 }, { id: 2 }, { id: 3 }])
+    expect(vi.mocked(fetch).mock.calls.map(([url]) => url)).toEqual([
+      '/api/employees',
+      '/api/employees?page=2',
+    ])
   })
 
   it('uses a generic message when the error body is not JSON', async () => {

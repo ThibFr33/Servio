@@ -2,7 +2,7 @@ import { useState } from 'react'
 import PositionCard from './PositionCard.jsx'
 import PositionForm from './PositionForm.jsx'
 import { usePositions } from './usePositions.js'
-import './PositionsPage.css'
+import '../admin/admin.css'
 
 function PositionsPage() {
   const { positions, isLoading, loadError, create, update, remove } =
@@ -15,17 +15,17 @@ function PositionsPage() {
   }
 
   return (
-    <section className="positions">
-      <header className="positions__header">
+    <section className="admin-page">
+      <header className="admin-page__header">
         <div>
-          <h1 className="positions__title">Postes</h1>
-          <p className="positions__subtitle">
+          <h1 className="admin-page__title">Postes</h1>
+          <p className="admin-page__subtitle">
             Les postes de l’établissement et leur couleur dans le planning.
           </p>
         </div>
         {!isCreating && !isLoading && !loadError && (
           <button
-            className="positions__button positions__button--primary"
+            className="admin-button admin-button--primary"
             type="button"
             onClick={() => setIsCreating(true)}
           >
@@ -35,7 +35,7 @@ function PositionsPage() {
       </header>
 
       {isCreating && (
-        <div className="position-card position-card--new">
+        <div className="admin-card admin-card--new">
           <PositionForm
             submitLabel="Créer le poste"
             onSubmit={handleCreate}
@@ -57,12 +57,12 @@ function PositionsPage() {
 
 function PositionList({ positions, isLoading, loadError, onUpdate, onDelete }) {
   if (isLoading) {
-    return <p className="positions__status">Chargement des postes…</p>
+    return <p className="admin-status">Chargement des postes…</p>
   }
 
   if (loadError) {
     return (
-      <p className="positions__error" role="alert">
+      <p className="admin-error" role="alert">
         {loadError}
       </p>
     )
@@ -70,14 +70,14 @@ function PositionList({ positions, isLoading, loadError, onUpdate, onDelete }) {
 
   if (positions.length === 0) {
     return (
-      <p className="positions__status">
+      <p className="admin-status">
         Aucun poste pour l’instant. Créez le premier : Cuisine, Salle, Plonge…
       </p>
     )
   }
 
   return (
-    <ul className="positions__list" aria-label="Liste des postes">
+    <ul className="admin-list" aria-label="Liste des postes">
       {positions.map((position) => (
         <PositionCard
           key={position.id}
