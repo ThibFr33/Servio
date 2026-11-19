@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { fetchCurrentUser } from '../../api/auth.js'
+import { fetchPositions } from '../../api/positions.js'
 import App from '../../App.jsx'
 
 vi.mock('../../api/auth.js', () => ({
@@ -9,6 +10,9 @@ vi.mock('../../api/auth.js', () => ({
   login: vi.fn(),
   logout: vi.fn(),
 }))
+
+// The positions page loads its list: an empty one is enough here.
+vi.mock('../../api/positions.js', () => ({ fetchPositions: vi.fn() }))
 
 function logInAs(role) {
   vi.mocked(fetchCurrentUser).mockResolvedValue({
@@ -31,6 +35,7 @@ function renderApp(path) {
 describe('app layout', () => {
   beforeEach(() => {
     vi.resetAllMocks()
+    vi.mocked(fetchPositions).mockResolvedValue([])
   })
 
   it('shows the administration menu to an admin', async () => {

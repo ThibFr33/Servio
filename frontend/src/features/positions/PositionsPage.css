@@ -1,0 +1,190 @@
+.positions {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 720px;
+}
+
+.positions__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.positions__title {
+  margin: 0 0 4px;
+  font-size: 1.75rem;
+  font-weight: 600;
+}
+
+.positions__subtitle,
+.positions__status {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+.positions__list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.positions__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.positions__button {
+  padding: 7px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--text);
+  background: transparent;
+  cursor: pointer;
+}
+
+.positions__button:hover {
+  background: var(--panel);
+}
+
+.positions__button:disabled {
+  opacity: 0.7;
+  cursor: progress;
+}
+
+.positions__button--primary {
+  border-color: var(--accent);
+  color: var(--bg);
+  background: var(--accent);
+}
+
+.positions__button--primary:hover {
+  background: var(--accent);
+  opacity: 0.9;
+}
+
+.positions__button--danger {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.positions__button--danger:hover {
+  background: var(--danger-bg);
+}
+
+.positions__error {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  color: var(--danger);
+  background: var(--danger-bg);
+}
+
+.position-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--bg);
+}
+
+.position-card--new {
+  background: var(--panel);
+}
+
+.position-card__summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+/* The colour is chosen by the admin: shown as a dot only, never behind text,
+   so it can never make a label unreadable. */
+.position-card__swatch {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px var(--border);
+}
+
+.position-card__name {
+  flex: 1;
+  font-weight: 500;
+}
+
+.position-card__question {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.position-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.position-form__fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.position-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.position-form__field--name {
+  flex: 1;
+  min-width: 200px;
+}
+
+.position-form__field input {
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font: inherit;
+  font-weight: 400;
+  color: var(--text);
+  background: var(--panel);
+}
+
+.position-form__field input[type='color'] {
+  width: 64px;
+  height: 40px;
+  padding: 4px;
+  cursor: pointer;
+}
+
+.position-form__field input:focus-visible,
+.positions__button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.position-form__field input[aria-invalid='true'] {
+  border-color: var(--danger);
+}
+
+.position-form__field-error {
+  font-weight: 400;
+  color: var(--danger);
+}
